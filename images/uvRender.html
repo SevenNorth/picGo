@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Intro to layers | Sample | ArcGIS API for JavaScript 4.18</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.16/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.16/"></script>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #layerToggle {
+            top: 20px;
+            right: 20px;
+            position: absolute;
+            z-index: 99;
+            background-color: white;
+            border-radius: 8px;
+            padding: 10px;
+            opacity: 0.75;
+        }
+    </style>
+
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/TileLayer",
+            "esri/layers/MapImageLayer",
+            "esri/Ground",
+            "esri/layers/ElevationLayer",
+            "esri/layers/SceneLayer",
+            "esri/layers/FeatureLayer",
+        ], function (Map, MapView, TileLayer, MapImageLayer, Ground, ElevationLayer, SceneLayer, FeatureLayer) {
+
+            var vec = new TileLayer({   // 底图切片服务
+                url: "http://172.34.56.251:90/OneMapServer/rest/services/Vector_HSB/MapServer",
+                // url: "https://172.34.56.246/geoscene/rest/services/CimBaseMap/Vector_LSBB/MapServer",
+                //spatialReference: { wkid: 4490 }
+            });
+
+            const boundaryUrl = 'http://localhost:8080/OneMapServer/rest/services/CDXZQH_QXJ/MapServer/0';
+            const uvRenderer = {
+                type: "unique-value",
+                field: 'COUTRICT ',
+                defaultSymbol: {
+                    type: 'simple-fill',
+                    color: [0, 189, 0],
+                    style: 'solid',
+                    outline: {
+                        width:10,
+                    },
+                },
+                uniqueValueInfos:[
+                    {
+                        value: '青羊区',
+                        label: '青羊区',
+                        symbol: {
+                            type: 'simple-fill',
+                            color: [229, 0, 0],
+                            style: 'solid',
+                            outline: {
+                                color: "#f00",
+                                width: 10
+                            }
+                        },
+                    },
+                ]
+            };
+            var lyr = new FeatureLayer({
+                url: boundaryUrl,
+                renderer: uvRenderer,
+            })
+
+            var map = new Map({
+                basemap: {  // 底图
+                    baseLayers: [vec]
+                },
+                // ground: new Ground({   // 地形
+                //   layers: [ elevat ]
+                // }),
+                layers: [lyr]
+            });
+            window.map = map
+            var view = new MapView({
+                container: "viewDiv",
+                map: map,
+                //viewingModle: 'globe',
+                spatialReference: { wkid: 4490 },
+                zoom: 7
+            });
+            view.when(() => {
+                view.goTo(vec.fullExtent);
+            })
+        });
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
